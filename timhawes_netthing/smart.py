@@ -30,6 +30,7 @@ class NetThing(JsonPacketManager):
         self.filewriter = None
         self.connected_callback = None
         self.disconnected_callback = None
+        self.file_changed_callback = None
         self.last_receive = None
         self.receive_timeout = 65
         self.last_send = None
@@ -128,6 +129,8 @@ class NetThing(JsonPacketManager):
             if data.get("eof"):
                 self.filewriter.commit()
                 self.send({"cmd": "file_write_ok", "filename": data["filename"]})
+                if self.file_changed_callback:
+                    self.file_changed_callback(data["filename"])
             else:
                 self.send(
                     {
