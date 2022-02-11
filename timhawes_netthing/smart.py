@@ -41,22 +41,25 @@ class NetThing(JsonPacketManager):
 
     def reload(self, config_file):
         """Load configuration from JSON file and reconnect."""
-        with open(config_file, "rb") as file:
-            config = json.load(file)
-            for k in ["clientid", "password", "host", "port"]:
-                if k in config:
-                    setattr(self, k, config[k])
-            if config.get("tls") is True:
-                if config.get("ca"):
-                    self.ssl_context = ssl.SSLContext()
-                    self.ssl_context.load_verify_locations(cadata=config["ca"])
-                    self.ssl_context.check_hostname = False
+        try:
+            with open(config_file, "rb") as file:
+                config = json.load(file)
+                for k in ["clientid", "password", "host", "port"]:
+                    if k in config:
+                        setattr(self, k, config[k])
+                if config.get("tls") is True:
+                    if config.get("ca"):
+                        self.ssl_context = ssl.SSLContext()
+                        self.ssl_context.load_verify_locations(cadata=config["ca"])
+                        self.ssl_context.check_hostname = False
+                    else:
+                        self.ssl_context = ssl.create_default_context()
                 else:
-                    self.ssl_context = ssl.create_default_context()
-            else:
-                self.ssl_context = None
-        if not self.paused:
-            self.reconnect()
+                    self.ssl_context = None
+            if not self.paused:
+                self.reconnect()
+        except OSError:
+            print(f"NetThing: {config_file} not found")
 
     def connect_hook(self):
         self._count_connect += 1
