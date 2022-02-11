@@ -27,7 +27,7 @@ def send_file_info(stream, filename, root="/"):
         else:
             reply["md5"] = None
             reply["size"] = None
-    except FileNotFoundError:
+    except OSError:
         reply["md5"] = None
         reply["size"] = None
     stream.send(reply)
